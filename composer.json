@@ -1,0 +1,25 @@
+{
+    "name": "four-bytes/four-discord-client",
+    "description": "Synchronous Discord webhook client using GuzzleHTTP",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "4 Bytes",
+            "email": "info@4bytes.de"
+        }
+    ],
+    "require": {
+        "guzzlehttp/guzzle": "^7.9"
+    },
+    "autoload": {
+        "psr-4": {
+            "Four\\Discord\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Four\\Discord\\Tests\\": "tests/"
+        }
+    }
+}
