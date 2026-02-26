@@ -1,20 +1,23 @@
 # Four Discord Client
 
-A synchronous Discord webhook client for PHP using GuzzleHTTP.
+A PHP library for sending messages to Discord webhooks using PSR-18.
 
 ## Features
 
-- 🚀 **Synchronous** - No async/await complexity
-- 📝 **Simple API** - Easy to use webhook messaging
-- 🎨 **Rich Embeds** - Support for Discord embed messages
-- 🔄 **Rate Limiting** - Built-in rate limit header parsing
-- ⚡ **Lightweight** - Minimal dependencies
+- **PSR-18 Compatible** — Works with any PSR-18 HTTP client
+- **Synchronous** — No async/await complexity
+- **Simple API** — Easy to use webhook messaging
+- **Rich Embeds** — Support for Discord embed messages
+- **Rate Limiting** — Built-in rate limit header parsing
+- **Lightweight** — Minimal dependencies
 
 ## Installation
 
 ```bash
 composer require four-bytes/four-discord-client
 ```
+
+This package automatically resolves PSR-18 clients via `php-http/discovery`.
 
 ## Quick Start
 
@@ -23,7 +26,8 @@ composer require four-bytes/four-discord-client
 
 use Four\Discord\WebhookClient;
 
-$client = new WebhookClient('https://discord.com/api/webhooks/YOUR_WEBHOOK_ID/YOUR_WEBHOOK_TOKEN');
+// Factory method (recommended) — auto-discovers PSR-18 client
+$client = WebhookClient::create('https://discord.com/api/webhooks/YOUR_WEBHOOK_ID/YOUR_WEBHOOK_TOKEN');
 
 // Send simple message
 $response = $client->sendMessage(
@@ -91,11 +95,23 @@ if (!$response->isSuccess()) {
 }
 ```
 
+### Rate Limit Headers
+
+The response object provides access to Discord's rate limit headers:
+
+```php
+$response = $client->sendMessage('Hello!');
+
+// Get rate limit info
+$remaining = $response->getRateLimitRemaining();  // Requests left
+$reset = $response->getRateLimitReset();          // Unix timestamp when limit resets
+```
+
 ## Discord Webhook Setup
 
 1. Go to your Discord server settings
 2. Navigate to **Integrations** → **Webhooks**
-3. Click **Create Webhook**
+3. Click **New Webhook**
 4. Configure name and channel
 5. Copy the **Webhook URL**
 
@@ -103,49 +119,117 @@ if (!$response->isSuccess()) {
 
 ### WebhookClient
 
-#### `__construct(string $webhookUrl, ?Client $httpClient = null)`
+#### Factory Method
 
-Create a new webhook client.
+```php
+public static function create(string $webhookUrl): self
+```
 
-#### `sendMessage(string $content, ?string $username = null, ?string $avatarUrl = null): WebhookResponse`
+Create a client with auto-discovered PSR-18 client. Recommended for most use cases.
+
+#### Constructor
+
+```php
+public function __construct(
+    string $url,
+    ?ClientInterface $psrClient = null,
+    ?RequestFactoryInterface $requestFactory = null,
+    ?StreamFactoryInterface $streamFactory = null
+)
+```
+
+Create a client with dependency injection. Use this if you need to provide a specific PSR-18 implementation.
+
+#### sendMessage
+
+```php
+public function sendMessage(
+    string $content,
+    ?string $username = null,
+    ?string $avatarUrl = null
+): WebhookResponse
+```
 
 Send a simple text message.
 
-#### `sendEmbed(array $embed, ?string $content = null, ?string $username = null, ?string $avatarUrl = null): WebhookResponse`
+#### sendEmbed
+
+```php
+public function sendEmbed(
+    array $embed,
+    ?string $content = null,
+    ?string $username = null,
+    ?string $avatarUrl = null
+): WebhookResponse
+```
 
 Send an embed message.
 
+#### getWebhookUrl
+
+```php
+public function getWebhookUrl(): string
+```
+
+Get the configured webhook URL.
+
 ### WebhookResponse
 
-#### `isSuccess(): bool`
+#### isSuccess
 
-Check if the request was successful.
+```php
+public function isSuccess(): bool
+```
 
-#### `getStatusCode(): int`
+Check if the request was successful (2xx status code).
+
+#### getStatusCode
+
+```php
+public function getStatusCode(): int
+```
 
 Get HTTP status code.
 
-#### `getErrorMessage(): ?string`
+#### getErrorMessage
+
+```php
+public function getErrorMessage(): ?string
+```
 
 Get error message if request failed.
 
-#### `getRateLimitRemaining(): ?int`
+#### getResponseBody
 
-Get remaining rate limit count.
+```php
+public function getResponseBody(): ?string
+```
 
-#### `getRateLimitReset(): ?int`
+Get raw response body.
 
-Get rate limit reset timestamp.
+#### getRateLimitRemaining
+
+```php
+public function getRateLimitRemaining(): ?int
+```
+
+Get remaining rate limit count from `X-RateLimit-Remaining` header.
+
+#### getRateLimitReset
+
+```php
+public function getRateLimitReset(): ?int
+```
+
+Get rate limit reset timestamp from `X-RateLimit-Reset` header.
 
 ## Requirements
 
-- PHP 8.0+
-- GuzzleHTTP 7.0+
+- PHP 8.1+
+- `four-bytes/four-http-client ^4.0`
+- PSR-18 HTTP client (auto-discovered via `php-http/discovery`)
+- PSR-17 request and stream factories
 
 ## License
 
 MIT
-
-## Author
-
-4 Bytes - info@4bytes.de
