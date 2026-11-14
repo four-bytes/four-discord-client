@@ -225,7 +225,7 @@ Get rate limit reset timestamp from `X-RateLimit-Reset` header.
 
 ## Requirements
 
-- PHP 8.1+
+- PHP 8.4+
 - `four-bytes/four-http-client ^4.0`
 - PSR-18 HTTP client (auto-discovered via `php-http/discovery`)
 - PSR-17 request and stream factories
