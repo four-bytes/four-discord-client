@@ -1,6 +1,12 @@
 {
     "name": "four-bytes/four-discord-client",
-    "description": "Discord webhook client using PSR-18",
+    "description": "PHP client for Discord webhooks — PSR-18, built on four-http-client",
+    "keywords": [
+        "discord",
+        "webhook",
+        "psr-18",
+        "php"
+    ],
     "type": "library",
     "license": "MIT",
     "authors": [
